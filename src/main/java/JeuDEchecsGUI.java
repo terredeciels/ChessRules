@@ -55,6 +55,7 @@ public class JeuDEchecsGUI extends JFrame {
     // Initialisation des pièces du jeu
     // Initialisation des pièces du jeu
     // Initialisation des pièces du jeu
+    // Initialisation des pièces du jeu
     private void initJeu() {
         plateau = new Piece[8][8];  // Plateau de 8x8 cases
 
@@ -67,9 +68,15 @@ public class JeuDEchecsGUI extends JFrame {
 
         // Initialisation des pions blancs et noirs
         for (int i = 0; i < 8; i++) {
-            plateau[1][i] = new Pion(1, i, "blanc");  // Pions blancs à la rangée 1
-            plateau[6][i] = new Pion(6, i, "noir");   // Pions noirs à la rangée 6
+            plateau[1][i] = new Pion(1, i, "blanc");  // Pions blancs
+            plateau[6][i] = new Pion(6, i, "noir");   // Pions noirs
         }
+
+        // Initialisation des tours
+        plateau[0][0] = new Tour(0, 0, "blanc");
+        plateau[0][7] = new Tour(0, 7, "blanc");
+        plateau[7][0] = new Tour(7, 0, "noir");
+        plateau[7][7] = new Tour(7, 7, "noir");
 
         mettreAJourPlateauGraphique();
     }
@@ -77,13 +84,22 @@ public class JeuDEchecsGUI extends JFrame {
     private void mettreAJourPlateauGraphique() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                Piece piece = plateau[i][j];
-                if (piece != null) {
-                    if (piece instanceof Pion) {
-                        boutonsPlateau[i][j].setText(piece.getCouleur().equals("blanc") ? "P" : "p");
+                boutonsPlateau[i][j].setText("");  // Efface le texte précédent
+                if (plateau[i][j] != null) {
+                    if (plateau[i][j] instanceof Pion) {
+                        if (plateau[i][j].getCouleur().equals("blanc")) {
+                            boutonsPlateau[i][j].setText("P");  // Représentation d'un pion blanc
+                        } else {
+                            boutonsPlateau[i][j].setText("p");  // Représentation d'un pion noir
+                        }
+                    } else if (plateau[i][j] instanceof Tour) {
+                        if (plateau[i][j].getCouleur().equals("blanc")) {
+                            boutonsPlateau[i][j].setText("T");  // Représentation d'une tour blanche
+                        } else {
+                            boutonsPlateau[i][j].setText("t");  // Représentation d'une tour noire
+                        }
                     }
-                } else {
-                    boutonsPlateau[i][j].setText("");  // Si pas de pièce
+                    // Vous pouvez également ajouter d'autres pièces ici (comme les fous, cavaliers, etc.)
                 }
             }
         }
@@ -173,63 +189,3 @@ abstract class Piece {
     }
 }
 
-// Classe Pion avec mise à jour des coordonnées après chaque déplacement
-class Pion extends Piece {
-    public Pion(int positionX, int positionY, String couleur) {
-        super(positionX, positionY, couleur);
-    }
-
-    @Override
-    public boolean deplacementValide(int nouvelleX, int nouvelleY, Piece[][] plateau) {
-        int differenceY = nouvelleX - positionX;  // Changement sur l'axe Y (vertical)
-        int differenceX = nouvelleY - positionY;  // Changement sur l'axe X (horizontal)
-
-        // Debug : Imprimer les informations critiques
-        System.out.println("Position actuelle : (" + positionX + ", " + positionY + ")");
-        System.out.println("Position de destination : (" + nouvelleX + ", " + nouvelleY + ")");
-        System.out.println("Différence Y (Vertical) : " + differenceY);
-        System.out.println("Différence X (Horizontal) : " + differenceX);
-        System.out.println("État de la case destination : " + (plateau[nouvelleX][nouvelleY] == null ? "Libre" : "Occupée"));
-
-        // Mouvement normal pour un pion blanc (avance vers le bas du tableau)
-        if (couleur.equals("blanc")) {
-            System.out.println("Pion blanc en mouvement...");
-            if (differenceY == 1 && differenceX == 0) {
-                if (plateau[nouvelleX][nouvelleY] == null) {
-                    return true;
-                }
-            }
-
-            if (positionX == 1 && differenceY == 2 && differenceX == 0) {
-                if (plateau[nouvelleX][nouvelleY] == null && plateau[positionX + 1][positionY] == null) {
-                    return true;
-                }
-            }
-        }
-
-        // Mouvement normal pour un pion noir (avance vers le haut du tableau)
-        else if (couleur.equals("noir")) {
-            System.out.println("Pion noir en mouvement...");
-            if (differenceY == -1 && differenceX == 0) {
-                if (plateau[nouvelleX][nouvelleY] == null) {
-                    return true;
-                }
-            }
-
-            if (positionX == 6 && differenceY == -2 && differenceX == 0) {
-                if (plateau[nouvelleX][nouvelleY] == null && plateau[positionX - 1][positionY] == null) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    // Méthode pour mettre à jour la position du pion après un déplacement
-    public void deplacer(int nouvelleX, int nouvelleY, Piece[][] plateau) {
-        this.positionX = nouvelleX;
-        this.positionY = nouvelleY;
-        System.out.println("Nouvelle position du pion : (" + positionX + ", " + positionY + ")");
-    }
-}
